@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-glass-bg: #0f172a;
+  --color-glass-card: rgba(255, 255, 255, 0.05);
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+  --color-glass-accent: #6366f1; /* indigo-500 */
+  --color-glass-text: #f1f5f9; /* slate-100 */
+  --color-glass-muted: #94a3b8; /* slate-400 */
+  
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-glass-bg text-glass-text font-sans antialiased;
+  }
+}
+
+.glass-card {
+  @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] shadow-xl;
+}
+
+.glass-sidebar {
+  @apply bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2.5rem];
+}
+
+.glass-button {
+  @apply px-6 py-2 bg-indigo-500 text-white rounded-full transition-all hover:bg-indigo-600 active:scale-95 shadow-lg shadow-indigo-500/20;
+}
+
+.glass-input {
+  @apply bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-glass-text placeholder-glass-muted outline-none focus:border-indigo-500/50 transition-colors;
+}
+
+.blur-blob {
+  @apply absolute rounded-full blur-[120px] opacity-40 pointer-events-none;
+}
