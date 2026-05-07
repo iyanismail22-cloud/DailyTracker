@@ -1,0 +1,112 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Functions
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isVerifiedUser() { return isSignedIn() && request.auth.token.email_verified == true; }
+
+    // Task Validation
+    function isValidTask(data) {
+      return data.keys().hasAll(['title', 'date', 'isCompleted', 'ownerId']) 
+      && data.title is string && data.title.size() <= 200
+      && data.date is string && data.date.size() <= 20
+      && data.isCompleted is bool
+      && data.ownerId == request.auth.uid
+      && (!('priority' in data) || data.priority in ['low', 'medium', 'high'])
+      && (!('category' in data) || data.category in ['work', 'personal', 'health', 'finance', 'other']);
+    }
+
+    // Finance Validation
+    function isValidFinance(data) {
+      return data.keys().hasAll(['date', 'amount', 'type', 'ownerId'])
+      && data.amount is number && data.amount >= 0
+      && data.type in ['expense', 'savings', 'income']
+      && data.ownerId == request.auth.uid;
+    }
+
+    // Health Validation
+    function isValidHealth(data) {
+      return data.keys().hasAll(['date', 'ownerId'])
+      && data.ownerId == request.auth.uid
+      && (!('energyLevel' in data) || (data.energyLevel is number && data.energyLevel >= 1 && data.energyLevel <= 10))
+      && (!('stressLevel' in data) || (data.stressLevel is number && data.stressLevel >= 1 && data.stressLevel <= 10));
+    }
+
+    // Book Validation
+    function isValidBook(data) {
+      return data.keys().hasAll(['title', 'status', 'ownerId'])
+      && data.title is string && data.title.size() <= 200
+      && data.status in ['want', 'reading', 'finished']
+      && data.ownerId == request.auth.uid
+      && (!('author' in data) || (data.author is string && data.author.size() <= 100));
+    }
+
+    // Movie Validation
+    function isValidMovie(data) {
+      return data.keys().hasAll(['title', 'type', 'status', 'ownerId'])
+      && data.title is string && data.title.size() <= 200
+      && data.type in ['movie', 'series']
+      && data.status in ['want', 'watching', 'finished']
+      && data.ownerId == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      
+      match /tasks/{taskId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId) && isVerifiedUser() && isValidId(taskId) && isValidTask(incoming()) 
+                      && incoming().createdAt == request.time;
+        allow update: if isOwner(userId) && isVerifiedUser() && isValidTask(incoming())
+                      && incoming().ownerId == existing().ownerId
+                      && incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(userId) && isVerifiedUser();
+      }
+
+      match /finances/{financeId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId) && isVerifiedUser() && isValidId(financeId) && isValidFinance(incoming())
+                      && incoming().createdAt == request.time;
+        allow update: if isOwner(userId) && isVerifiedUser() && isValidFinance(incoming())
+                      && incoming().ownerId == existing().ownerId;
+        allow delete: if isOwner(userId) && isVerifiedUser();
+      }
+
+      match /health/{dateId} {
+        allow get, list: if isOwner(userId);
+        allow write: if isOwner(userId) && isVerifiedUser() && isValidId(dateId) && isValidHealth(incoming())
+                     && incoming().updatedAt == request.time;
+      }
+
+      match /books/{bookId} {
+        allow list, get: if isOwner(userId);
+        allow create: if isOwner(userId) && isVerifiedUser() && isValidBook(incoming()) && incoming().createdAt == request.time;
+        allow update: if isOwner(userId) && isVerifiedUser() && isValidBook(incoming());
+        allow delete: if isOwner(userId) && isVerifiedUser();
+      }
+
+      match /movies/{movieId} {
+        allow list, get: if isOwner(userId);
+        allow create: if isOwner(userId) && isVerifiedUser() && isValidMovie(incoming()) && incoming().createdAt == request.time;
+        allow update: if isOwner(userId) && isVerifiedUser() && isValidMovie(incoming());
+        allow delete: if isOwner(userId) && isVerifiedUser();
+      }
+
+      match /settings/{settingId} {
+        allow get, list: if isOwner(userId);
+        allow write: if isOwner(userId) && isVerifiedUser();
+      }
+    }
+  }
+}
