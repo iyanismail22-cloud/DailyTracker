@@ -1,0 +1,6 @@
+{
+  "name": "LifeLink: Daily Tracker",
+  "description": "A comprehensive daily companion for productivity, health, finance, and mental well-being with AI-powered insights and scheduling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["AI Insights", "Financial Tracking", "Health Monitoring", "Smart Scheduling"]
+}
