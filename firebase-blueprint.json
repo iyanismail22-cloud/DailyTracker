@@ -1,0 +1,107 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "A daily task or to-do item",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "isCompleted": { "type": "boolean" },
+        "isImportant": { "type": "boolean" },
+        "category": { "type": "string", "enum": ["work", "personal", "health", "finance", "other"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "date", "isCompleted", "ownerId"]
+    },
+    "FinanceEntry": {
+      "title": "Finance Entry",
+      "description": "Daily expense or income entry",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["expense", "savings", "income"] },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "amount", "type", "ownerId"]
+    },
+    "HealthEntry": {
+      "title": "Health Entry",
+      "description": "Daily health and mental well-being data",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "waterIntake": { "type": "number" },
+        "sleepDuration": { "type": "number" },
+        "steps": { "type": "number" },
+        "exerciseDuration": { "type": "number" },
+        "energyLevel": { "type": "number" },
+        "stressLevel": { "type": "number" },
+        "journal": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "ownerId"]
+    },
+    "Book": {
+      "title": "Book",
+      "description": "A book in the user's library",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "author": { "type": "string" },
+        "status": { "type": "string", "enum": ["want", "reading", "finished"] },
+        "rating": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "status"]
+    },
+    "Movie": {
+      "title": "Movie",
+      "description": "A movie or series in the user's watchlist",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["movie", "series"] },
+        "status": { "type": "string", "enum": ["want", "watching", "finished"] },
+        "rating": { "type": "number" },
+        "posterUrl": { "type": "string" },
+        "currentEpisode": { "type": "number" },
+        "totalEpisodes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "type", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "User specific tasks"
+    },
+    "/users/{userId}/finances/{financeId}": {
+      "schema": "FinanceEntry",
+      "description": "User financial transactions"
+    },
+    "/users/{userId}/health/{dateId}": {
+      "schema": "HealthEntry",
+      "description": "User daily health tracking"
+    },
+    "/users/{userId}/books/{bookId}": {
+      "schema": "Book",
+      "description": "User's book collection"
+    },
+    "/users/{userId}/movies/{movieId}": {
+      "schema": "Movie",
+      "description": "User's movie watchlist"
+    }
+  }
+}
